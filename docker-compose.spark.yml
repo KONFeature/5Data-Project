@@ -1,5 +1,8 @@
 version: "3.7"
+
+# Compose for the spark instances
 services:
+  # Master instance
   master:
     image: gettyimages/spark
     command: bin/spark-class org.apache.spark.deploy.master.Master -h master
@@ -22,9 +25,10 @@ services:
       - 7077:7077
       - 8080:8080
     volumes:
-      - ./conf/master:/conf
-      - ./data:/tmp/data
+      - ./spark/conf/master:/conf
+      - ./spark/data:/tmp/data
 
+  # Worker instance
   worker:
     image: gettyimages/spark
     command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
@@ -47,5 +51,5 @@ services:
     ports:
       - 8081:8081
     volumes:
-      - ./conf/worker:/conf
-      - ./data:/tmp/data
+      - ./spark/conf/worker:/conf
+      - ./spark/data:/tmp/data
