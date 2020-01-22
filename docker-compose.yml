@@ -1,7 +1,11 @@
-version: '3.7'
+version: "3.7"
 services:
-        spark:
-                build:
-                        context: ./dockerfiles
-                        dockerfile: Dockerfile.spark
-    
+  spark:
+    build:
+      context: ./dockerfiles
+      dockerfile: Dockerfile.spark
+    expose:
+      - 7077
+    ports:
+      - "7077:7077"
+      - "8080:8080"
