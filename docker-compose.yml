@@ -1,0 +1,7 @@
+version: '3.7'
+services:
+        spark:
+                build:
+                        context: ./dockerfiles
+                        dockerfile: Dockerfile.spark
+    
