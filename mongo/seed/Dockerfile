@@ -2,7 +2,7 @@
 FROM mongo
 
 # Copie de nos données
-COPY students.json /students.json
+ADD http://nivelais.com/students.json /students.json
 
 # Import des données dans mango
 CMD mongoimport --host mongo \ 
