@@ -2,7 +2,7 @@ version: "3.7"
 
 # Compose for the spark instances
 services:
-  # Master instance
+  # Spark Master instance
   master:
     image: gettyimages/spark
     command: bin/spark-class org.apache.spark.deploy.master.Master -h master
@@ -28,7 +28,7 @@ services:
       - ./spark/conf/master:/conf
       - ./spark/data:/tmp/data
 
-  # Worker instance
+  # Spark Worker instance
   worker:
     image: gettyimages/spark
     command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
@@ -53,3 +53,42 @@ services:
     volumes:
       - ./spark/conf/worker:/conf
       - ./spark/data:/tmp/data
+
+  # Mongo instance directly
+  mongo:
+    image: mongo
+    volumes:
+      - ./mongo/data:/data
+
+  # Mongo-seeder (load students data in json)
+  mongo-seed:
+    build: ./mongo/seed
+    depends_on:
+      - mongo
+
+  # Mongo express, to view our database
+  mongo-express:
+    image: mongo-express
+    restart: always
+    environment:
+      # MongoExpress web credentials
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGOEXPRESS_LOGIN}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGOEXPRESS_PASSWORD}
+      # MongoDB specific config
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+    depends_on:
+      - mongo
+    ports:
+      - "8081:8081"
+
+  # Shiny server (For R)
+  shiny:
+    build: 'shiny/'
+    restart: always
+    user: 'root'
+    ports:
+      - '80:3838'
+    volumes:
+      - './shiny/logs:/var/log/shiny-server'
+      - './shiny/mountpoints/apps:/srv/shiny-server'
+
