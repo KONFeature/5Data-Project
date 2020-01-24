@@ -3,7 +3,7 @@ version: "3.7"
 # Compose for the rShiny instances
 services:
   shiny:
-    image: rocker/shiny
+    build: 'shiny/'
     restart: always
     user: 'root'
     ports:
