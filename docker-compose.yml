@@ -4,7 +4,7 @@ version: "3.7"
 services:
   # Spark Master instance
   master:
-    image: gettyimages/spark
+    build: ./spark
     command: bin/spark-class org.apache.spark.deploy.master.Master -h master
     hostname: master
     environment:
@@ -30,7 +30,7 @@ services:
 
   # Spark Worker instance
   worker:
-    image: gettyimages/spark
+    build: ./spark
     command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
     hostname: worker
     environment:
