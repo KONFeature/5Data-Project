@@ -1,15 +1,22 @@
 FROM rocker/shiny:latest
 
-# Install missing libs for SparkR
-RUN apt update
-RUN apt install libgit2-dev
-RUN apt install libssl-dev
-RUN apt install libssh2-1-dev
-RUN apt install libudunits2-dev
-RUN apt install libxml2-dev
+# Update image
+RUN apt update -y
+RUN apt upgrade -y
 
-#install package 
-RUN  echo 'install.packages(c("rjson", "SparkR", "ggvis", "dplyr"), \
+# Install openJdk8
+RUN apt install openjdk-8-jre -y
+
+# Install missing libs for SparkR
+RUN apt install libgit2-dev libssl-dev libssh2-1-dev libudunits2-dev libxml2-dev -y
+
+# Download & extract spark
+RUN wget  -O /opt/spark.tgz http://apache.crihan.fr/dist/spark/spark-2.4.4/spark-2.4.4-bin-hadoop2.7.tgz
+RUN tar zxvf /opt/spark.tgz
+RUN export SPARK_HOME=/opt/spark-2.4.4-bin-hadoop2.7
+
+# Install package 
+RUN  echo 'install.packages(c("rjson", "SparkR", "ggvis", "dplyr", "devtools", "sparklyr"), \
   repos="http://cran.us.r-project.org", \
   dependencies=TRUE)' > /tmp/packages.R \
   && Rscript /tmp/packages.R
