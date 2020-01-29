@@ -11,8 +11,8 @@ library(SparkR)
 # Prepare list of config and package for the SparkR Session
 sparkConfigList = list(
   spark.executor.memory="1g",
-  spark.mongodb.input.uri="mongodb://127.0.0.1/data-projects.students?readPreference=primaryPreferred",
-  spark.mongodb.output.uri="mongodb://127.0.0.1/data-projects.students")
+  spark.mongodb.input.uri="mongodb://mongo/data-projects.students?readPreference=primaryPreferred",
+  spark.mongodb.output.uri="mongodb://mongo/data-projects.students")
 
 sparkPackageList = c("org.mongodb.spark:mongo-spark-connector_2.11:2.4.1")
 
@@ -23,9 +23,10 @@ my_spark <- sparkR.session(
  appName="r-project",
  sparkPackages = sparkPackageList)
 
- # Copy iris database to mongo via spark (in theory)
-iris_tbl <- createDataFrame(iris)
-head(iris_tbl)
+ # Try to read data from mongo
+students <- read.df("", source = "mongo")
+print("Schema:")
+printSchema(students)
 
 # Close the spark connection
 sparkR.session.stop()

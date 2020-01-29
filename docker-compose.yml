@@ -57,6 +57,10 @@ services:
   # Mongo instance directly
   mongo:
     image: mongo
+    expose:
+      - 27017
+    ports:
+      - "27017:27017"
     volumes:
       - ./mongo/data:/data
 
