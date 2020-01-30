@@ -16,7 +16,7 @@ RUN tar zxvf /opt/spark.tgz -C /opt/
 RUN export SPARK_HOME=/opt/spark-2.4.4-bin-hadoop2.7
 
 # Install package 
-RUN  echo 'install.packages(c("rjson", "SparkR", "ggvis", "dplyr", "devtools"), \
+RUN  echo 'install.packages(c("rjson", "SparkR", "ggvis", "dplyr", "devtools", "listviewer", "httr"), \
   repos="http://cran.us.r-project.org", \
   dependencies=TRUE)' > /tmp/packages.R \
   && Rscript /tmp/packages.R

@@ -7,7 +7,7 @@ Sys.setenv(SPARK_HOME="/opt/spark-2.4.4-bin-hadoop2.7")
 
 # Import sparkR lib
 library(SparkR)
-
+library(listviewer)
 # Prepare list of config and package for the SparkR Session
 sparkConfigList = list(
   spark.executor.memory="1g",
@@ -24,24 +24,24 @@ my_spark <- sparkR.session(
  sparkPackages = sparkPackageList)
 
  # Try to read data from mongo
-students <- read.df("", source = "mongo")
-print("Schema:")
-printSchema(students)
+students <- read.df("", source = "com.mongodb.spark.sql.DefaultSource",
+                          database = "data-projects", collection = "students")
+
+
+
 
 # Close the spark connection
-sparkR.session.stop()
+# sparkR.session.stop()
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
    
-  output$distPlot <- renderPlot({
-    
-    # generate bins based on input$bins from ui.R
-    x    <- faithful[, 2] 
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
-    
-    # draw the histogram with the specified number of bins
-    hist(x, breaks = bins, col = 'darkgray', border = 'white')    
+  output$jsed <- renderPrint({
+    print("Schema:")
+    printSchema(students)
   })
   
+  
 })
+
+
