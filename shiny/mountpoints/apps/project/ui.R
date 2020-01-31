@@ -45,7 +45,8 @@ ui <- dashboardPage(
           valueBoxOutput("valueStudentsGraduatedCount", width = 4),
           valueBoxOutput("valueStudentsLeftCount", width = 4),
           valueBoxOutput("valueStudentsGraduatedRatio", width = 6),
-          valueBoxOutput("valueStudentsLeftRatio", width = 6)
+          valueBoxOutput("valueStudentsLeftRatio", width = 6),
+          textOutput("testStr")
         ),
 
         # Plot row
@@ -56,7 +57,15 @@ ui <- dashboardPage(
             status = "info",
             solidHeader = TRUE,
             "Better way used by Supinfo to attract students",
-            highchartOutput("plotFamousDiscoveryRease")
+            highchartOutput("plotDiscoveryReason")
+          ),
+          box(
+            title = "Supinfo leaving reason",
+            width = 6,
+            status = "warning",
+            solidHeader = TRUE,
+            "Worth cause why students leave Supinfo",
+            highchartOutput("plotLeavingReason")
           )
         )
 
