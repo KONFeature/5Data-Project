@@ -1,0 +1,113 @@
+version: "3.7"
+
+# Compose for the spark instances
+services:
+  # Spark Master instance
+  master:
+    build: ./spark
+    image: spark-master
+    container_name: spark_master
+    command: bin/spark-class org.apache.spark.deploy.master.Master -h master
+    hostname: master
+    environment:
+      - MASTER=spark://master:${SPARK_MASTER_PORT}
+      - SPARK_CONF_DIR=/conf
+      - SPARK_PUBLIC_DNS=localhost
+    expose:
+      - 7001 # Driver port
+      - 7002 # File server port
+      - 7003 # Broadcast port
+      - 7004 # Rep class server port
+      - 7005 # Block manager port
+      - 6066 # Rest API port
+      - ${SPARK_MASTER_PORT}
+    ports:
+      - "${SPARK_MASTER_UI_OUT_PORT}:${SPARK_MASTER_UI_PORT}"
+    volumes:
+      - ./spark/conf/master:/conf
+    networks:
+      - project-network
+
+  # Spark Worker instance
+  worker:
+    build: ./spark
+    image: spark-worker
+    container_name: spark_worker
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:${SPARK_MASTER_PORT}
+    hostname: worker
+    environment:
+      - SPARK_CONF_DIR=/conf
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=1g
+      - SPARK_WORKER_PORT=${SPARK_WORKER_PORT}
+      - SPARK_WORKER_WEBUI_PORT=${SPARK_WORKER_UI_PORT}
+      - SPARK_PUBLIC_DNS=localhost
+    links:
+      - master
+    expose:
+      - 7012 # File server port
+      - 7013 # Broadcast port
+      - 7014 # Rep class server port
+      - 7015 # Block manager port
+      - ${SPARK_WORKER_PORT}
+    ports:
+      - "${SPARK_WORKER_UI_OUT_PORT}:${SPARK_WORKER_UI_PORT}"
+    volumes:
+      - ./spark/conf/worker:/conf
+    networks:
+      - project-network
+
+  # Mongo instance directly
+  mongo:
+    image: mongo
+    container_name: mongo
+    expose:
+      - ${MONGO_PORT}
+    volumes:
+      - ./mongo/data:/data
+    networks:
+      - project-network
+
+  # Mongo-seeder (load students data in json)
+  mongo-seed:
+    build: ./mongo/seed
+    image: mongo-seed
+    container_name: mongo_seed
+    depends_on:
+      - mongo
+    networks:
+      - project-network
+
+  # Mongo express, to view our database
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express
+    restart: always
+    environment:
+      # Mongo express UI authentification
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USER}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASS}
+    depends_on:
+      - mongo
+    ports:
+      - "${MONGO_EXPRESS_UI_OUT_PORT}:8081"
+    networks:
+      - project-network
+
+  # Shiny server (For R)
+  shiny:
+    build: ./shiny
+    image: shiny
+    container_name: shiny
+    restart: always
+    user: "root"
+    ports:
+      - "${SHINY_OUT_PORT}:${SHINY_PORT}"
+    volumes:
+      - "./shiny/logs:/var/log/shiny-server"
+      - "./shiny/mountpoints/apps:/srv/shiny-server"
+    networks:
+      - project-network
+
+networks:
+  project-network:
