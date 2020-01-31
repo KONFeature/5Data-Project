@@ -7,7 +7,7 @@ Sys.setenv(SPARK_HOME="/opt/spark-2.4.4-bin-hadoop2.7")
 
 # Import sparkR lib
 library(SparkR)
-library(listviewer)
+library(jsonlite)
 # Prepare list of config and package for the SparkR Session
 sparkConfigList = list(
   spark.executor.memory="1g",
@@ -24,24 +24,29 @@ my_spark <- sparkR.session(
  sparkPackages = sparkPackageList)
 
  # Try to read data from mongo
-students <- read.df("", source = "com.mongodb.spark.sql.DefaultSource",
-                          database = "data-projects", collection = "students")
+students <- read.df("", source = "mongo")
 
+students_paul <- filter(students,students$first_name == "Paul")
 
+# contact <- select(students_paul, "contact")
 
-
-# Close the spark connection
-# sparkR.session.stop()
+df_paul <- as.data.frame(students_paul)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
    
-  output$jsed <- renderPrint({
-    print("Schema:")
-    printSchema(students)
+  output$schema <- renderPrint({
+      # students
+      head(df_contact)
   })
+  
+  output$table <- renderDataTable(df_contact)
+
+  
   
   
 })
 
 
+# Close the spark connection
+# sparkR.session.stop()
