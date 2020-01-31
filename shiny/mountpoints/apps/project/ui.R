@@ -18,8 +18,10 @@ ui <- dashboardPage(
     sidebarSearchForm(textId = "searchText", buttonId = "searchButton", label = "Search..."),
     # Tabs
     sidebarMenu(
+      id="currentTab",
+      menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
       menuItem("Table", tabName = "table", icon = icon("table")),
-      menuItem("Birth Date", tabName = "birth_date", icon = icon("birthday-cake"))
+      menuItem("Filtered charts", tabName = "filtered_chart", icon = icon("chart-bar"))
     )
     # Selectors
 
@@ -27,28 +29,41 @@ ui <- dashboardPage(
 
   # Content of the page
   dashboardBody(
-    
-    # Top row
-    fluidRow(
-      # Number of students
-      valueBox(10 * 2, "Students", icon = icon("list-ol")),
-      # Number of graduated students
-      valueBox(10 * 2, "Graduated students", icon = icon("stamp"), color = "green"),
-      # Percent of graduated students
-      valueBox(10 * 2, "Ratio of gradueted students", icon = icon("percentage"), color = "yellow")
-    ),
 
     # Tab part
     tabItems(
-      # Table with all the data
+      ####################
+      # DASHBOARD
+      ####################
+      tabItem(
+        tabName="dashboard",
+    
+        # Value row
+        fluidRow(
+          valueBoxOutput("valueStudentsCount"),
+          valueBoxOutput("valueStudentsGraduatedCount"),
+          valueBoxOutput("valueStudentsLeftCount"),
+          valueBoxOutput("valueStudentsGraduatedRatio"),
+          valueBoxOutput("valueStudentsLeftRatio")
+        ),
+
+        # Plot row
+        fluidRow(
+          plotOutput("plotFamousDiscoveryRease")
+        )
+
+        # Some basic chart ? Graduation / year etc ; Better way student discover the school ? 
+      ),
+
+      ####################
+      # TABLE
+      ####################
       tabItem(
         tabName="table",
 
-        h1("Table with all the data we got"),
-
         fluidRow(
           box(
-            title = "Table of the data",
+            title = "Table with all the students data",
             width = 12,
             status = "success",
             solidHeader = TRUE,
@@ -58,10 +73,12 @@ ui <- dashboardPage(
         )
       ),
 
-
+      ####################
+      # FILTERED CHART
+      ####################
       tabItem(
-        tabName="birth_date",
-        h1("test birth_date")
+        tabName="filtered_chart",
+        h1("test filtered_chart")
       )
     )
   )
