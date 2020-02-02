@@ -19,10 +19,10 @@ shinyUI(fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
-      # textOutput("schema")
+      textOutput("schema"),
       # jsoneditOutput( "jsed" )
 
-             dataTableOutput('table')
+      dataTableOutput('table')
 
     )
   )
