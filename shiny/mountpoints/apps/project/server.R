@@ -30,27 +30,33 @@ my_spark <- sparkR.session(
 
 # Fetch students from mongo
 students <- read.df("", source = "mongo")
-
-students <- SparkR::filter(students,students$id < 10000)
-# Register this SparkDataFrame as a temporary view, needed to run sql queries
-createOrReplaceTempView(students, "students")
-
-# Calculate the var we want for the value box
-test_sql <- sql("SELECT COUNT(*) as count FROM students")
-count_students <- count(students)
-count_grad_students <- count(filter(students, students$graduated == TRUE))
-count_left_students <- count(filter(students, students$course_was_left == TRUE))
-ratio_students_graduate <- count_grad_students / count_students * 100
-ratio_students_left <- count_left_students / count_students * 100
+students <- SparkR::filter(students,students$id < 100)
 df <- as.data.frame(students)
 
+# Register this SparkDataFrame as a temporary view, needed to run sql queries
+# createOrReplaceTempView(students, "students")
+
+# Calculate the var we want for the value box
+# test_sql <- sql("SELECT COUNT(*) as count FROM students")
+# count_students <- count(students)
+# count_grad_students <- count(filter(students, students$graduated == TRUE))
+# count_left_students <- count(filter(students, students$course_was_left == TRUE))
+# ratio_students_graduate <- count_grad_students / count_students * 100
+# ratio_students_left <- count_left_students / count_students * 100
+count_students <- 12
+count_grad_students <- 13
+count_left_students <- 14
+ratio_students_graduate <- 15
+ratio_students_left <- 16
+
 # Some group for easy plot
-discovery_reason <- 
-  summarize(groupBy(students, students$university_discovery_reason), count = n(students$university_discovery_reason))
-discovery_reason <- head(arrange(discovery_reason, desc(discovery_reason$count)), 10L)
-leaving_reason <- 
-  summarize(groupBy(students, students$course_leaving_reason), count = n(students$course_leaving_reason))
-leaving_reason <- head(arrange(leaving_reason, desc(leaving_reason$count)), 9L)
+# discovery_reason <- 
+#   summarize(groupBy(students, students$university_discovery_reason), count = n(students$university_discovery_reason))
+# discovery_reason <- head(arrange(discovery_reason, desc(discovery_reason$count)), 10L)
+# leaving_reason <- 
+#   summarize(groupBy(students, students$course_leaving_reason), count = n(students$course_leaving_reason))
+# leaving_reason <- head(arrange(leaving_reason, desc(leaving_reason$count)), 9L)
+
 # Separation de contact en email et phone
 email <- list()
 phone <- list()
@@ -63,13 +69,14 @@ for (i in df$contact) {
     phone[index] <- u
   }
   index <- index +1
-
 }
+
 # Creation du df avec tous les contacts
 df_contact <- cbind(email, phone)
 
 # Ajout du df de contact au df global
 df_all <- cbind(df, df_contact)
+
 # Suppression de l'ancienne colonne
 df_all$contact <- NULL
 
@@ -115,6 +122,7 @@ for (i in df$courses) {
         ects <- cbind(ects, A.Sc.1_ects)
         index <- index + 1
       }
+
       if(year != 'A.Sc.2' && index == 2) {
         A.Sc.2 = 'A.Sc.2'
         A.Sc.2_afterHighSchool = NA
@@ -136,6 +144,7 @@ for (i in df$courses) {
         ects <- cbind(ects, A.Sc.2_ects)
         index <- index + 1
       }
+
       if(year != 'B.Sc.' && index == 3) {
         B.Sc. = 'B.Sc.'
         B.Sc._afterHighSchool = NA
@@ -157,6 +166,7 @@ for (i in df$courses) {
         ects <- cbind(ects, B.Sc._ects)
         index <- index +1
       }
+
       if( year != 'M.Sc.1' && index == 4) {
         M.Sc.1 = 'M.Sc.1'
         M.Sc.1_afterHighSchool = NA
@@ -178,6 +188,7 @@ for (i in df$courses) {
         ects <- cbind(ects, M.Sc.1_ects)
         index <- index + 1
       }
+
       if(year != 'M.Sc.2' && index == 5) {
         M.Sc.2 = 'M.Sc.2'
         M.Sc.2_afterHighSchool = NA
@@ -199,6 +210,7 @@ for (i in df$courses) {
         ects <- cbind(ects, M.Sc.2_ects)
         index <- index + 1
       }
+
       abbrevation <- cbind(abbrevation, year)
       colnames(abbrevation) <- abbrevation
     }
@@ -237,6 +249,7 @@ for (i in df$courses) {
     }
     index <- index + 1
   }
+
   if(!( 'A.Sc.1' %in% abbrevation)) {
     A.Sc.1 = 'A.Sc.1'
     A.Sc.1_afterHighSchool = NA
@@ -257,6 +270,7 @@ for (i in df$courses) {
     end_date <- cbind(end_date, A.Sc.1_end_date)
     ects <- cbind(ects, A.Sc.1_ects)
   }
+
   if(!( 'A.Sc.2' %in% abbrevation)) {
     A.Sc.2 = 'A.Sc.2'
     A.Sc.2_afterHighSchool = NA
@@ -277,6 +291,7 @@ for (i in df$courses) {
     end_date <- cbind(end_date, A.Sc.2_end_date)
     ects <- cbind(ects, A.Sc.2_ects)
   }
+
   if(!( 'B.Sc.' %in% abbrevation)) {
     B.Sc. = 'B.Sc.'
     B.Sc._afterHighSchool = NA
@@ -297,6 +312,7 @@ for (i in df$courses) {
     end_date <- cbind(end_date, B.Sc._end_date)
     ects <- cbind(ects, B.Sc._ects)
   }
+
   if(!( 'M.Sc.1' %in% abbrevation)) {
     M.Sc.1 = 'M.Sc.1'
     M.Sc.1_afterHighSchool = NA
@@ -317,6 +333,7 @@ for (i in df$courses) {
     end_date <- cbind(end_date, M.Sc.1_end_date)
     ects <- cbind(ects, M.Sc.1_ects)
   }
+
   if(!( 'M.Sc.2' %in% abbrevation)) {
     M.Sc.2 = 'M.Sc.2'
     M.Sc.2_afterHighSchool = NA
@@ -352,7 +369,7 @@ df_all$courses <- NULL
 shinyServer(function(input, output) {
 
   output$testStr <- renderPrint({
-    test_sql
+    "output pour les test"
   })
 
   ####################
@@ -399,20 +416,20 @@ shinyServer(function(input, output) {
       color = "red"
     )
   })
-  output$plotDiscoveryReason <- renderHighchart({
-    highchart() %>%
-      hc_chart(type = "column") %>%
-      hc_xAxis(categories = discovery_reason$university_discovery_reason) %>%
-      hc_add_series(discovery_reason$count,
-                    name = "Student from", showInLegend = FALSE)
-  })
-  output$plotLeavingReason <- renderHighchart({
-    highchart() %>%
-      hc_chart(type = "column") %>%
-      hc_xAxis(categories = leaving_reason$course_leaving_reason) %>%
-      hc_add_series(leaving_reason$count,
-                    name = "Student from", showInLegend = FALSE)
-  })
+  # output$plotDiscoveryReason <- renderHighchart({
+  #   highchart() %>%
+  #     hc_chart(type = "column") %>%
+  #     hc_xAxis(categories = discovery_reason$university_discovery_reason) %>%
+  #     hc_add_series(discovery_reason$count,
+  #                   name = "Student from", showInLegend = FALSE)
+  # })
+  # output$plotLeavingReason <- renderHighchart({
+  #   highchart() %>%
+  #     hc_chart(type = "column") %>%
+  #     hc_xAxis(categories = leaving_reason$course_leaving_reason) %>%
+  #     hc_add_series(leaving_reason$count,
+  #                   name = "Student from", showInLegend = FALSE)
+  # })
 
   ####################
   # TABLE
