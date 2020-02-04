@@ -33,6 +33,7 @@ students <- read.df("", source = "mongo")
 
 df <- as.data.frame(students)
 
+# Separation de contact en email et phone
 email <- list()
 phone <- list()
 index <- 1
@@ -46,11 +47,20 @@ for (i in df$contact) {
   index <- index +1
 
 }
+# Creation du df avec tous les contacts
 df_contact <- cbind(email, phone)
 
+# Ajout du df de contact au df global
 df_all <- cbind(df, df_contact)
+# Suppression de l'ancienne colonne
 df_all$contact <- NULL
 
+#Drop des df qui ne servent plus
+SparkR::drop(df_contact)
+SparkR::drop(df)
+Spark::drop(students)
+
+# Separation des courses
 df_course <- list()
 for (i in df$courses) {
   afterHighSchool <- list()
@@ -314,10 +324,12 @@ for (i in df$courses) {
   df_course <- rbind(df_course, row)
 }
 
-
+# Ajout du df de courses au df global
 df_all <- cbind(df_all, df_course)
+# Suppression de l'ancienne colonne
 df_all$courses <- NULL
 
+spark.
 
 
 # Define server logic required to draw a histogram
