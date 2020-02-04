@@ -29,7 +29,7 @@ my_spark <- sparkR.session(
  # Try to read data from mongo
 students <- read.df("", source = "mongo")
 
-# students <- SparkR::filter(students,students$first_name == "Paul")
+students <- SparkR::filter(students,students$id < 10000)
 
 df <- as.data.frame(students)
 
@@ -56,9 +56,9 @@ df_all <- cbind(df, df_contact)
 df_all$contact <- NULL
 
 #Drop des df qui ne servent plus
-SparkR::drop(df_contact)
-SparkR::drop(df)
-Spark::drop(students)
+# SparkR::drop(df_contact)
+# SparkR::drop(df)
+# Spark::drop(students)
 
 # Separation des courses
 df_course <- list()
@@ -322,15 +322,13 @@ for (i in df$courses) {
   
   row <- cbind(abbrevation, afterHighSchool, country, campus, full_name, apprenticeship, start_date, end_date, ects )
   df_course <- rbind(df_course, row)
+  # SparkR::drop(row)
 }
 
 # Ajout du df de courses au df global
 df_all <- cbind(df_all, df_course)
 # Suppression de l'ancienne colonne
 df_all$courses <- NULL
-
-spark.
-
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
