@@ -30,38 +30,35 @@ my_spark <- sparkR.session(
 
 # Fetch students from mongo
 students <- read.df("", source = "mongo")
-students <- SparkR::filter(students,students$id < 100)
+students <- SparkR::filter(students,students$id < 1000)
 df <- as.data.frame(students)
 
-# Register this SparkDataFrame as a temporary view, needed to run sql queries
-# createOrReplaceTempView(students, "students")
+# Arrange some cols
+df <- df %>% 
+  mutate(graduated = replace_na(graduated, FALSE)) %>%
+  mutate(course_was_left = replace_na(course_was_left, FALSE))
 
 # Calculate the var we want for the value box
-# test_sql <- sql("SELECT COUNT(*) as count FROM students")
-# count_students <- count(students)
-# count_grad_students <- count(filter(students, students$graduated == TRUE))
-# count_left_students <- count(filter(students, students$course_was_left == TRUE))
-# ratio_students_graduate <- count_grad_students / count_students * 100
-# ratio_students_left <- count_left_students / count_students * 100
-count_students <- 12
-count_grad_students <- 13
-count_left_students <- 14
-ratio_students_graduate <- 15
-ratio_students_left <- 16
+count_students <- nrow(df)
+count_grad_students <- nrow(df[df$graduated == TRUE, ])
+count_left_students <- nrow(df[df$course_was_left == TRUE, ])
+ratio_students_graduate <- count_grad_students / count_students * 100
+ratio_students_left <- count_left_students / count_students * 100
 
 # Some group for easy plot
-# discovery_reason <- 
-#   summarize(groupBy(students, students$university_discovery_reason), count = n(students$university_discovery_reason))
-# discovery_reason <- head(arrange(discovery_reason, desc(discovery_reason$count)), 10L)
-# leaving_reason <- 
-#   summarize(groupBy(students, students$course_leaving_reason), count = n(students$course_leaving_reason))
-# leaving_reason <- head(arrange(leaving_reason, desc(leaving_reason$count)), 9L)
+discovery_reason <- df %>% 
+  dplyr::count(university_discovery_reason) %>%
+  dplyr::arrange(desc(n))
+leaving_reason <- df %>% 
+  dplyr::count(course_leaving_reason) %>%
+  head(., 5L) %>%
+  dplyr::arrange(desc(n))
 
 # Separation de contact en email et phone
 email <- list()
 phone <- list()
 index <- 1
-for (i in df$contact) {
+for (i in df  $contact) {
   for (t in i[1]) {
     email[index] <- t
   }
@@ -369,7 +366,7 @@ df_all$courses <- NULL
 shinyServer(function(input, output) {
 
   output$testStr <- renderPrint({
-    "output pour les test"
+    "head(leaving_reason)"
   })
 
   ####################
@@ -402,7 +399,7 @@ shinyServer(function(input, output) {
   })
   output$valueStudentsGraduatedRatio <- renderValueBox({
     valueBox(
-      paste0(ratio_students_graduate, "%"),
+      paste0(format(ratio_students_graduate, , digits = 2), "%"),
       "Ratio of gradueted students",
       icon = icon("percentage"),
       color = "yellow"
@@ -410,31 +407,31 @@ shinyServer(function(input, output) {
   })
   output$valueStudentsLeftRatio <- renderValueBox({
     valueBox(
-      paste0(ratio_students_left, "%"),
+      paste0(format(ratio_students_left, digits = 2), "%"),
       "Ratio of students who left",
       icon = icon("percentage"),
       color = "red"
     )
   })
-  # output$plotDiscoveryReason <- renderHighchart({
-  #   highchart() %>%
-  #     hc_chart(type = "column") %>%
-  #     hc_xAxis(categories = discovery_reason$university_discovery_reason) %>%
-  #     hc_add_series(discovery_reason$count,
-  #                   name = "Student from", showInLegend = FALSE)
-  # })
-  # output$plotLeavingReason <- renderHighchart({
-  #   highchart() %>%
-  #     hc_chart(type = "column") %>%
-  #     hc_xAxis(categories = leaving_reason$course_leaving_reason) %>%
-  #     hc_add_series(leaving_reason$count,
-  #                   name = "Student from", showInLegend = FALSE)
-  # })
+  output$plotDiscoveryReason <- renderHighchart({
+    highchart() %>%
+      hc_chart(type = "column") %>%
+      hc_xAxis(categories = discovery_reason$university_discovery_reason) %>%
+      hc_add_series(discovery_reason$n,
+                    name = "Student from", showInLegend = FALSE)
+  })
+  output$plotLeavingReason <- renderHighchart({
+    highchart() %>%
+      hc_chart(type = "column") %>%
+      hc_xAxis(categories = leaving_reason$course_leaving_reason) %>%
+      hc_add_series(leaving_reason$n,
+                    name = "Student leaved", showInLegend = FALSE)
+  })
 
   ####################
   # TABLE
   ####################
-  output$table <- renderDataTable(head(students))
+  output$table <- renderDataTable(head(df))
 
 
 })
