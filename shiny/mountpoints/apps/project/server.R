@@ -351,17 +351,27 @@ df_all$courses <- NULL
 df_all <- df_all %>%
   mutate(graduated = replace_na(graduated, FALSE),
     course_was_left = replace_na(course_was_left, FALSE),
-    A.Sc.1_ects = as.numeric(A.Sc.1_ects),
+    A.Sc.1_ects = as.numeric(A.Sc.1_ects), # Convertie les credit ECTS en numeric
     A.Sc.2_ects = as.numeric(A.Sc.2_ects),
     B.Sc._ects = as.numeric(B.Sc._ects),
     M.Sc.1_ects = as.numeric(M.Sc.1_ects),
     M.Sc.2_ects = as.numeric(M.Sc.2_ects),
-    A.Sc.1_ects = replace_na(A.Sc.1_ects, 0),
+    A.Sc.1_ects = replace_na(A.Sc.1_ects, 0), # Remplace les NA des crédits en 0
     A.Sc.2_ects = replace_na(A.Sc.2_ects, 0),
     B.Sc._ects = replace_na(B.Sc._ects, 0),
     M.Sc.1_ects = replace_na(M.Sc.1_ects, 0),
-    M.Sc.2_ects = replace_na(M.Sc.2_ects, 0)) %>%
-    mutate(sum_ects = rowSums(.[grep("_ects", names(.))], na.rm = TRUE))
+    M.Sc.2_ects = replace_na(M.Sc.2_ects, 0), 
+    last_country = ifelse(!is.na(M.Sc.2_country), M.Sc.2_country, # Ajoute le dernier pays de l'utilisateur
+                    ifelse(!is.na(M.Sc.1_country), M.Sc.1_country, 
+                      ifelse(!is.na(B.Sc._country), B.Sc._country, 
+                        ifelse(!is.na(A.Sc.2_country), A.Sc.2_country, 
+                          ifelse(!is.na(A.Sc.1_country), A.Sc.1_country, NA))))),
+    last_campus = ifelse(!is.na(M.Sc.2_campus), M.Sc.2_campus, # Ajoute le dernier campus de l'utilisateur
+                    ifelse(!is.na(M.Sc.1_campus), M.Sc.1_campus, 
+                      ifelse(!is.na(B.Sc._campus), B.Sc._campus, 
+                        ifelse(!is.na(A.Sc.2_campus), A.Sc.2_campus, 
+                          ifelse(!is.na(A.Sc.1_campus), A.Sc.1_campus, NA)))))) %>%
+    mutate(sum_ects = rowSums(.[grep("_ects", names(.))], na.rm = TRUE)) # Calcul la somme des ECTS
 
 ####################
 # PREPARATION DU GRAPH
@@ -459,7 +469,7 @@ shinyServer(function(input, output) {
   ####################
 
   output$testStr <- renderPrint({
-    as.logical(input$graduated_select)
+    input$column_axis_x
   })
 
   output$dynamicPlot <- renderHighchart({
@@ -473,14 +483,18 @@ shinyServer(function(input, output) {
     if(!is.na(leave_filter)) {
       df_filtered <- df_filtered[df_filtered$course_was_left == leave_filter,]
     }
-    xAxis = input$column_axis_x
+
+    # Group & arrange df
+    df_filtered <- df_filtered %>%
+      dplyr::count(df_filtered[[input$column_axis_x]]) %>%
+      dplyr::arrange(desc(n))
 
     # Generate graph
     highchart() %>%
       hc_chart(type = "column") %>%
-      hc_xAxis(categories = df_filtered$university_discovery_reason) %>%
-      hc_add_series(df_filtered$sum_ects,
-                    name = "Sum ECTS", showInLegend = FALSE)
+      hc_xAxis(categories = df_filtered[[input$column_axis_x]]) %>%
+      hc_add_series(df_filtered$n,
+                    name = "Count", showInLegend = FALSE)
   })
 
 })
