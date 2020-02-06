@@ -133,7 +133,7 @@ ui <- dashboardPage(
                               "Discovery reason" = "university_discovery_reason",
                               "Leaving reason" = "course_leaving_reason",
                               "Last country" = "last_country",
-                              "Last campus" = "last_campus",), selected = "graduated")
+                              "Last campus" = "last_campus"), selected = "graduated")
           )
         ),
 
