@@ -11,7 +11,7 @@ library(SparkR)
 library(jsonlite)
 library(dplyr)
 library(tidyr)
-library (plyr)
+library(plyr)
 
 # Prepare list of config and package for the SparkR Session
 sparkConfigList = list(
@@ -28,44 +28,34 @@ my_spark <- sparkR.session(
  appName = "r-project",
  sparkPackages = sparkPackageList)
 
+
+
+####################
+# PREPARATION DU DF
+####################
+
 # Fetch students from mongo
 students <- read.df("", source = "mongo")
-students <- SparkR::filter(students,students$id < 1000)
+students <- SparkR::filter(students, students$id < 1000)
 df <- as.data.frame(students)
 
 # Arrange some cols
-df <- df %>% 
+df <- df %>%
   mutate(graduated = replace_na(graduated, FALSE)) %>%
   mutate(course_was_left = replace_na(course_was_left, FALSE))
-
-# Calculate the var we want for the value box
-count_students <- nrow(df)
-count_grad_students <- nrow(df[df$graduated == TRUE, ])
-count_left_students <- nrow(df[df$course_was_left == TRUE, ])
-ratio_students_graduate <- count_grad_students / count_students * 100
-ratio_students_left <- count_left_students / count_students * 100
-
-# Some group for easy plot
-discovery_reason <- df %>% 
-  dplyr::count(university_discovery_reason) %>%
-  dplyr::arrange(desc(n))
-leaving_reason <- df %>% 
-  dplyr::count(course_leaving_reason) %>%
-  head(., 5L) %>%
-  dplyr::arrange(desc(n))
 
 # Separation de contact en email et phone
 email <- list()
 phone <- list()
 index <- 1
-for (i in df  $contact) {
+for (i in df$contact) {
   for (t in i[1]) {
     email[index] <- t
   }
   for (u in i[2]) {
     phone[index] <- u
   }
-  index <- index +1
+  index <- index + 1
 }
 
 # Creation du df avec tous les contacts
@@ -95,10 +85,10 @@ for (i in df$courses) {
   end_date <- list()
   ects <- list()
   index <- 1
-  
+
   for (t in i) {
     for (year in t[1]) {
-      if(year != 'A.Sc.1' && index == 1) {
+      if (year != 'A.Sc.1' && index == 1) {
         A.Sc.1 = 'A.Sc.1'
         A.Sc.1_afterHighSchool = NA
         A.Sc.1_country = NA
@@ -120,7 +110,7 @@ for (i in df$courses) {
         index <- index + 1
       }
 
-      if(year != 'A.Sc.2' && index == 2) {
+      if (year != 'A.Sc.2' && index == 2) {
         A.Sc.2 = 'A.Sc.2'
         A.Sc.2_afterHighSchool = NA
         A.Sc.2_country = NA
@@ -142,7 +132,7 @@ for (i in df$courses) {
         index <- index + 1
       }
 
-      if(year != 'B.Sc.' && index == 3) {
+      if (year != 'B.Sc.' && index == 3) {
         B.Sc. = 'B.Sc.'
         B.Sc._afterHighSchool = NA
         B.Sc._country = NA
@@ -161,10 +151,10 @@ for (i in df$courses) {
         start_date <- cbind(start_date, B.Sc._start_date)
         end_date <- cbind(end_date, B.Sc._end_date)
         ects <- cbind(ects, B.Sc._ects)
-        index <- index +1
+        index <- index + 1
       }
 
-      if( year != 'M.Sc.1' && index == 4) {
+      if (year != 'M.Sc.1' && index == 4) {
         M.Sc.1 = 'M.Sc.1'
         M.Sc.1_afterHighSchool = NA
         M.Sc.1_country = NA
@@ -186,7 +176,7 @@ for (i in df$courses) {
         index <- index + 1
       }
 
-      if(year != 'M.Sc.2' && index == 5) {
+      if (year != 'M.Sc.2' && index == 5) {
         M.Sc.2 = 'M.Sc.2'
         M.Sc.2_afterHighSchool = NA
         M.Sc.2_country = NA
@@ -215,7 +205,7 @@ for (i in df$courses) {
       afterHighSchool <- cbind(afterHighSchool, yearAfterHighSchool)
       colnames(afterHighSchool) <- paste0(abbrevation, "_afterHighSchool")
     }
-    
+
     for (countryName in t[5]) {
       country <- cbind(country, countryName)
       colnames(country) <- paste0(abbrevation, "_country")
@@ -247,7 +237,7 @@ for (i in df$courses) {
     index <- index + 1
   }
 
-  if(!( 'A.Sc.1' %in% abbrevation)) {
+  if (!('A.Sc.1' %in% abbrevation)) {
     A.Sc.1 = 'A.Sc.1'
     A.Sc.1_afterHighSchool = NA
     A.Sc.1_country = NA
@@ -268,7 +258,7 @@ for (i in df$courses) {
     ects <- cbind(ects, A.Sc.1_ects)
   }
 
-  if(!( 'A.Sc.2' %in% abbrevation)) {
+  if (!('A.Sc.2' %in% abbrevation)) {
     A.Sc.2 = 'A.Sc.2'
     A.Sc.2_afterHighSchool = NA
     A.Sc.2_country = NA
@@ -289,7 +279,7 @@ for (i in df$courses) {
     ects <- cbind(ects, A.Sc.2_ects)
   }
 
-  if(!( 'B.Sc.' %in% abbrevation)) {
+  if (!('B.Sc.' %in% abbrevation)) {
     B.Sc. = 'B.Sc.'
     B.Sc._afterHighSchool = NA
     B.Sc._country = NA
@@ -310,7 +300,7 @@ for (i in df$courses) {
     ects <- cbind(ects, B.Sc._ects)
   }
 
-  if(!( 'M.Sc.1' %in% abbrevation)) {
+  if (!('M.Sc.1' %in% abbrevation)) {
     M.Sc.1 = 'M.Sc.1'
     M.Sc.1_afterHighSchool = NA
     M.Sc.1_country = NA
@@ -331,7 +321,7 @@ for (i in df$courses) {
     ects <- cbind(ects, M.Sc.1_ects)
   }
 
-  if(!( 'M.Sc.2' %in% abbrevation)) {
+  if (!('M.Sc.2' %in% abbrevation)) {
     M.Sc.2 = 'M.Sc.2'
     M.Sc.2_afterHighSchool = NA
     M.Sc.2_country = NA
@@ -351,8 +341,8 @@ for (i in df$courses) {
     end_date <- cbind(end_date, M.Sc.2_end_date)
     ects <- cbind(ects, M.Sc.2_ects)
   }
-  
-  row <- cbind(abbrevation, afterHighSchool, country, campus, full_name, apprenticeship, start_date, end_date, ects )
+
+  row <- cbind(abbrevation, afterHighSchool, country, campus, full_name, apprenticeship, start_date, end_date, ects)
   df_course <- rbind(df_course, row)
   # SparkR::drop(row)
 }
@@ -361,6 +351,30 @@ for (i in df$courses) {
 df_all <- cbind(df_all, df_course)
 # Suppression de l'ancienne colonne
 df_all$courses <- NULL
+
+####################
+# PREPARATION DU GRAPH
+####################
+
+# Calculate the var we want for the value box
+count_students <- nrow(df_all)
+count_grad_students <- nrow(df_all[df_all$graduated == TRUE,])
+count_left_students <- nrow(df_all[df_all$course_was_left == TRUE,])
+ratio_students_graduate <- count_grad_students / count_students * 100
+ratio_students_left <- count_left_students / count_students * 100
+
+# Some group for easy plot
+discovery_reason <- df_all %>%
+  dplyr::count(university_discovery_reason) %>%
+  dplyr::arrange(desc(n))
+leaving_reason <- df_all %>%
+  dplyr::count(course_leaving_reason) %>%
+  head(., 5L) %>%
+  dplyr::arrange(desc(n))
+
+####################
+# LANCEMENT DU SERVEUR
+####################
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
@@ -399,7 +413,7 @@ shinyServer(function(input, output) {
   })
   output$valueStudentsGraduatedRatio <- renderValueBox({
     valueBox(
-      paste0(format(ratio_students_graduate, , digits = 2), "%"),
+      paste0(format(ratio_students_graduate,, digits = 2), "%"),
       "Ratio of gradueted students",
       icon = icon("percentage"),
       color = "yellow"
@@ -431,7 +445,7 @@ shinyServer(function(input, output) {
   ####################
   # TABLE
   ####################
-  output$table <- renderDataTable(head(df))
+  output$table <- renderDataTable(head(df_all))
 
 
 })
