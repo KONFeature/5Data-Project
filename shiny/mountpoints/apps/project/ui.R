@@ -45,8 +45,7 @@ ui <- dashboardPage(
           valueBoxOutput("valueStudentsGraduatedCount", width = 4),
           valueBoxOutput("valueStudentsLeftCount", width = 4),
           valueBoxOutput("valueStudentsGraduatedRatio", width = 6),
-          valueBoxOutput("valueStudentsLeftRatio", width = 6),
-          textOutput("testStr")
+          valueBoxOutput("valueStudentsLeftRatio", width = 6)
         ),
 
         # Plot row
@@ -95,7 +94,62 @@ ui <- dashboardPage(
       ####################
       tabItem(
         tabName="filtered_chart",
-        h1("test filtered_chart")
+
+        # Input row
+        fluidRow(
+          box(
+            title = "Filter on for the graph below",
+            width = 6,
+            status = "danger",
+            solidHeader = TRUE,
+            "Some filter on the input data used to display the below graph",
+            selectInput("graduated_select", 
+              h5("Student graduated"),
+              choices = list("No filter" = NA,
+                              "Graduated" = TRUE,
+                              "Not graduated" = FALSE), selected = NA),
+            selectInput("leave_select", 
+              h5("Student left"),
+              choices = list("No filter" = NA,
+                              "Left" = TRUE,
+                              "Not left" = FALSE), selected = NA)
+          ),
+          box(
+            title = "Wich column to display on the graph",
+            width = 6,
+            status = "success",
+            solidHeader = TRUE,
+            "Select the axis and the type of the graph to display",
+            selectInput("graph_type", 
+              h5("Graph type"),
+              choices = list("Column" = "column",
+                              "Bar" = "bar",
+                              "Line" = "line",
+                              "Pie" = "pie",
+                              "Tree Map" = "treemap",
+                              "Funnel" = "funnel",
+                              "Pyramid" = "pyramid"), selected = "column"),
+            selectInput("graph_axis_x", 
+              h5("Axe X"),
+              choices = list("Graduated" = "graduated",
+                              "Course was left" = "course_was_left",
+                              "Discovery reason" = "university_discovery_reason",
+                              "Leaving reason" = "course_leaving_reason",
+                              "Last country" = "last_country",
+                              "Last campus" = "last_campus"), selected = "graduated")
+          )
+        ),
+
+        fluidRow(
+          box(
+            title = "Result chart",
+            width = 12,
+            status = "info",
+            solidHeader = TRUE,
+            highchartOutput("dynamicPlot")
+          )
+          # textOutput("testStr")
+        )
       )
     )
   )

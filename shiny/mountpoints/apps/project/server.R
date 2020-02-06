@@ -6,12 +6,12 @@ Sys.setenv(SPARK_HOME = "/opt/spark-2.4.4-bin-hadoop2.7")
 library(jsonlite)
 library(shiny)
 library(highcharter)
-library(dplyr)
 library(SparkR)
+library(dplyr)
 library(jsonlite)
 library(dplyr)
 library(tidyr)
-library (plyr)
+library(plyr)
 
 # Prepare list of config and package for the SparkR Session
 sparkConfigList = list(
@@ -28,44 +28,29 @@ my_spark <- sparkR.session(
  appName = "r-project",
  sparkPackages = sparkPackageList)
 
+
+
+####################
+# PREPARATION DU DF
+####################
+
 # Fetch students from mongo
-students <- read.df("", source = "mongo")
-students <- SparkR::filter(students,students$id < 1000)
+students <- SparkR::read.df("", source = "mongo")
+students <- SparkR::filter(students, students$id < 1000)
 df <- as.data.frame(students)
-
-# Arrange some cols
-df <- df %>% 
-  mutate(graduated = replace_na(graduated, FALSE)) %>%
-  mutate(course_was_left = replace_na(course_was_left, FALSE))
-
-# Calculate the var we want for the value box
-count_students <- nrow(df)
-count_grad_students <- nrow(df[df$graduated == TRUE, ])
-count_left_students <- nrow(df[df$course_was_left == TRUE, ])
-ratio_students_graduate <- count_grad_students / count_students * 100
-ratio_students_left <- count_left_students / count_students * 100
-
-# Some group for easy plot
-discovery_reason <- df %>% 
-  dplyr::count(university_discovery_reason) %>%
-  dplyr::arrange(desc(n))
-leaving_reason <- df %>% 
-  dplyr::count(course_leaving_reason) %>%
-  head(., 5L) %>%
-  dplyr::arrange(desc(n))
 
 # Separation de contact en email et phone
 email <- list()
 phone <- list()
 index <- 1
-for (i in df  $contact) {
+for (i in df$contact) {
   for (t in i[1]) {
     email[index] <- t
   }
   for (u in i[2]) {
     phone[index] <- u
   }
-  index <- index +1
+  index <- index + 1
 }
 
 # Creation du df avec tous les contacts
@@ -95,10 +80,10 @@ for (i in df$courses) {
   end_date <- list()
   ects <- list()
   index <- 1
-  
+
   for (t in i) {
     for (year in t[1]) {
-      if(year != 'A.Sc.1' && index == 1) {
+      if (year != 'A.Sc.1' && index == 1) {
         A.Sc.1 = 'A.Sc.1'
         A.Sc.1_afterHighSchool = NA
         A.Sc.1_country = NA
@@ -120,7 +105,7 @@ for (i in df$courses) {
         index <- index + 1
       }
 
-      if(year != 'A.Sc.2' && index == 2) {
+      if (year != 'A.Sc.2' && index == 2) {
         A.Sc.2 = 'A.Sc.2'
         A.Sc.2_afterHighSchool = NA
         A.Sc.2_country = NA
@@ -142,7 +127,7 @@ for (i in df$courses) {
         index <- index + 1
       }
 
-      if(year != 'B.Sc.' && index == 3) {
+      if (year != 'B.Sc.' && index == 3) {
         B.Sc. = 'B.Sc.'
         B.Sc._afterHighSchool = NA
         B.Sc._country = NA
@@ -161,10 +146,10 @@ for (i in df$courses) {
         start_date <- cbind(start_date, B.Sc._start_date)
         end_date <- cbind(end_date, B.Sc._end_date)
         ects <- cbind(ects, B.Sc._ects)
-        index <- index +1
+        index <- index + 1
       }
 
-      if( year != 'M.Sc.1' && index == 4) {
+      if (year != 'M.Sc.1' && index == 4) {
         M.Sc.1 = 'M.Sc.1'
         M.Sc.1_afterHighSchool = NA
         M.Sc.1_country = NA
@@ -186,7 +171,7 @@ for (i in df$courses) {
         index <- index + 1
       }
 
-      if(year != 'M.Sc.2' && index == 5) {
+      if (year != 'M.Sc.2' && index == 5) {
         M.Sc.2 = 'M.Sc.2'
         M.Sc.2_afterHighSchool = NA
         M.Sc.2_country = NA
@@ -215,7 +200,7 @@ for (i in df$courses) {
       afterHighSchool <- cbind(afterHighSchool, yearAfterHighSchool)
       colnames(afterHighSchool) <- paste0(abbrevation, "_afterHighSchool")
     }
-    
+
     for (countryName in t[5]) {
       country <- cbind(country, countryName)
       colnames(country) <- paste0(abbrevation, "_country")
@@ -247,7 +232,7 @@ for (i in df$courses) {
     index <- index + 1
   }
 
-  if(!( 'A.Sc.1' %in% abbrevation)) {
+  if (!('A.Sc.1' %in% abbrevation)) {
     A.Sc.1 = 'A.Sc.1'
     A.Sc.1_afterHighSchool = NA
     A.Sc.1_country = NA
@@ -268,7 +253,7 @@ for (i in df$courses) {
     ects <- cbind(ects, A.Sc.1_ects)
   }
 
-  if(!( 'A.Sc.2' %in% abbrevation)) {
+  if (!('A.Sc.2' %in% abbrevation)) {
     A.Sc.2 = 'A.Sc.2'
     A.Sc.2_afterHighSchool = NA
     A.Sc.2_country = NA
@@ -289,7 +274,7 @@ for (i in df$courses) {
     ects <- cbind(ects, A.Sc.2_ects)
   }
 
-  if(!( 'B.Sc.' %in% abbrevation)) {
+  if (!('B.Sc.' %in% abbrevation)) {
     B.Sc. = 'B.Sc.'
     B.Sc._afterHighSchool = NA
     B.Sc._country = NA
@@ -310,7 +295,7 @@ for (i in df$courses) {
     ects <- cbind(ects, B.Sc._ects)
   }
 
-  if(!( 'M.Sc.1' %in% abbrevation)) {
+  if (!('M.Sc.1' %in% abbrevation)) {
     M.Sc.1 = 'M.Sc.1'
     M.Sc.1_afterHighSchool = NA
     M.Sc.1_country = NA
@@ -331,7 +316,7 @@ for (i in df$courses) {
     ects <- cbind(ects, M.Sc.1_ects)
   }
 
-  if(!( 'M.Sc.2' %in% abbrevation)) {
+  if (!('M.Sc.2' %in% abbrevation)) {
     M.Sc.2 = 'M.Sc.2'
     M.Sc.2_afterHighSchool = NA
     M.Sc.2_country = NA
@@ -351,8 +336,8 @@ for (i in df$courses) {
     end_date <- cbind(end_date, M.Sc.2_end_date)
     ects <- cbind(ects, M.Sc.2_ects)
   }
-  
-  row <- cbind(abbrevation, afterHighSchool, country, campus, full_name, apprenticeship, start_date, end_date, ects )
+
+  row <- cbind(abbrevation, afterHighSchool, country, campus, full_name, apprenticeship, start_date, end_date, ects)
   df_course <- rbind(df_course, row)
   # SparkR::drop(row)
 }
@@ -362,12 +347,69 @@ df_all <- cbind(df_all, df_course)
 # Suppression de l'ancienne colonne
 df_all$courses <- NULL
 
+# Arrange some cols and aggregate some data
+df_all <- df_all %>%
+  mutate(graduated = replace_na(graduated, FALSE),
+    course_was_left = replace_na(course_was_left, FALSE),
+    A.Sc.1_ects = as.numeric(A.Sc.1_ects), # Convertie les credit ECTS en numeric
+    A.Sc.2_ects = as.numeric(A.Sc.2_ects),
+    B.Sc._ects = as.numeric(B.Sc._ects),
+    M.Sc.1_ects = as.numeric(M.Sc.1_ects),
+    M.Sc.2_ects = as.numeric(M.Sc.2_ects),
+    A.Sc.1_apprenticeship = as.logical(A.Sc.1_apprenticeship), # Convertie les apprenticeship en logique
+    A.Sc.2_apprenticeship = as.logical(A.Sc.2_apprenticeship),
+    B.Sc._apprenticeship = as.logical(B.Sc._apprenticeship),
+    M.Sc.1_apprenticeship = as.logical(M.Sc.1_apprenticeship),
+    M.Sc.2_apprenticeship = as.logical(M.Sc.2_apprenticeship),
+    A.Sc.1_ects = replace_na(A.Sc.1_ects, 0), # Remplace les NA des crédits en 0
+    A.Sc.2_ects = replace_na(A.Sc.2_ects, 0),
+    B.Sc._ects = replace_na(B.Sc._ects, 0),
+    M.Sc.1_ects = replace_na(M.Sc.1_ects, 0),
+    M.Sc.2_ects = replace_na(M.Sc.2_ects, 0), 
+    A.Sc.1_apprenticeship = replace_na(A.Sc.1_apprenticeship, FALSE), # Remplace les NA des apprenticeship par false
+    A.Sc.2_apprenticeship = replace_na(A.Sc.2_apprenticeship, FALSE),
+    B.Sc._apprenticeship = replace_na(B.Sc._apprenticeship, FALSE),
+    M.Sc.1_apprenticeship = replace_na(M.Sc.1_apprenticeship, FALSE),
+    M.Sc.2_apprenticeship = replace_na(M.Sc.2_apprenticeship, FALSE),
+    last_country = as.character(ifelse(!is.na(M.Sc.2_country), M.Sc.2_country, # Ajoute le dernier pays de l'utilisateur
+                    ifelse(!is.na(M.Sc.1_country), M.Sc.1_country, 
+                      ifelse(!is.na(B.Sc._country), B.Sc._country, 
+                        ifelse(!is.na(A.Sc.2_country), A.Sc.2_country, 
+                          ifelse(!is.na(A.Sc.1_country), A.Sc.1_country, "unknown")))))),
+    last_campus = as.character(ifelse(!is.na(M.Sc.2_campus), M.Sc.2_campus, # Ajoute le dernier campus de l'utilisateur
+                    ifelse(!is.na(M.Sc.1_campus), M.Sc.1_campus, 
+                      ifelse(!is.na(B.Sc._campus), B.Sc._campus, 
+                        ifelse(!is.na(A.Sc.2_campus), A.Sc.2_campus, 
+                          ifelse(!is.na(A.Sc.1_campus), A.Sc.1_campus, "unknown")))))),     
+    apprenticeship_once = M.Sc.2_apprenticeship | M.Sc.1_apprenticeship | B.Sc._apprenticeship | A.Sc.2_apprenticeship | A.Sc.1_apprenticeship) %>%
+    mutate(sum_ects = rowSums(.[grep("_ects", names(.))], na.rm = TRUE)) # Calcul la somme des ECTS) 
+
+####################
+# PREPARATION DU GRAPH
+####################
+
+# Calculate the var we want for the value box
+count_students <- nrow(df_all)
+count_grad_students <- nrow(df_all[df_all$graduated == TRUE,])
+count_left_students <- nrow(df_all[df_all$course_was_left == TRUE,])
+ratio_students_graduate <- count_grad_students / count_students * 100
+ratio_students_left <- count_left_students / count_students * 100
+
+# Some group for easy plot
+discovery_reason <- df_all %>%
+  dplyr::count(university_discovery_reason) %>%
+  dplyr::arrange(desc(n))
+leaving_reason <- df_all %>%
+  dplyr::count(course_leaving_reason) %>%
+  head(., 5L) %>%
+  dplyr::arrange(desc(n))
+
+####################
+# LANCEMENT DU SERVEUR
+####################
+
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
-
-  output$testStr <- renderPrint({
-    "head(leaving_reason)"
-  })
 
   ####################
   # DASHBOARD
@@ -399,7 +441,7 @@ shinyServer(function(input, output) {
   })
   output$valueStudentsGraduatedRatio <- renderValueBox({
     valueBox(
-      paste0(format(ratio_students_graduate, , digits = 2), "%"),
+      paste0(format(ratio_students_graduate,, digits = 2), "%"),
       "Ratio of gradueted students",
       icon = icon("percentage"),
       color = "yellow"
@@ -431,8 +473,40 @@ shinyServer(function(input, output) {
   ####################
   # TABLE
   ####################
-  output$table <- renderDataTable(head(df))
+  output$table <- renderDataTable(head(df_all), options = list(scrollX = TRUE))
 
+  ####################
+  # Dynamic graph
+  ####################
+
+  output$testStr <- renderPrint({
+    "test"
+  })
+
+  output$dynamicPlot <- renderHighchart({
+    df_filtered <- df_all
+    # Check for filter
+    graduated_filter <- as.logical(input$graduated_select)
+    leave_filter <- as.logical(input$leave_select)
+    if(!is.na(graduated_filter)) {
+      df_filtered <- df_filtered[df_filtered$graduated == graduated_filter,]
+    }
+    if(!is.na(leave_filter)) {
+      df_filtered <- df_filtered[df_filtered$course_was_left == leave_filter,]
+    }
+
+    # Group & arrange df
+    df_filtered <- df_filtered %>%
+      dplyr::count(df_filtered[[input$graph_axis_x]], sort = TRUE)
+    names(df_filtered)[names(df_filtered) == "df_filtered[[input$graph_axis_x]]"] <- "to_display_row"
+
+    # Generate graph
+    highchart() %>%
+      hc_chart(type = input$graph_type) %>%
+      hc_xAxis(categories = df_filtered$to_display_row) %>%
+      hc_add_series(df_filtered$n,
+                    name = "Count", showInLegend = FALSE)
+  })
 
 })
 
