@@ -95,7 +95,47 @@ ui <- dashboardPage(
       ####################
       tabItem(
         tabName="filtered_chart",
-        h1("test filtered_chart")
+
+        # Input row
+        fluidRow(
+          box(
+            title = "Filter on for the graph below",
+            width = 4,
+            status = "info",
+            solidHeader = TRUE,
+            "Some filter on the input data used to display the below graph",
+            dateRangeInput("birthdate_range",
+              h5("Birthdate range")),
+            selectInput("graduated_select", 
+              h5("Student graduated"),
+              choices = list("No filter" = 0,
+                              "Graduated" = 1,
+                              "Not graduated" = 2), selected = 0),
+            selectInput("leave_select", 
+              h5("Student left"),
+              choices = list("No filter" = 0,
+                              "Left" = 1,
+                              "Not left" = 2), selected = 0)
+          ),
+          box(
+            title = "Wich column to display on the graph",
+            width = 4,
+            status = "success",
+            solidHeader = TRUE,
+            "Select the axis of the graph to display",
+            selectInput("column_axis_y", 
+              h5("Axe Y"),
+              choices = list("Count" = 0,
+                              "Mean" = 1), selected = 0),
+            selectInput("column_axis_x", 
+              h5("Axe X"),
+              choices = list("Discovery reason" = 0,
+                              "Leaving reason" = 1,
+                              "Last country" = 2,
+                              "Last campus" = 3,
+                              "ECTS Count" = 4), selected = 0)
+          )
+        )
       )
     )
   )

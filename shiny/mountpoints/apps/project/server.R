@@ -445,7 +445,7 @@ shinyServer(function(input, output) {
   ####################
   # TABLE
   ####################
-  output$table <- renderDataTable(head(df_all))
+  output$table <- renderDataTable(head(df_all), options = list(scrollX = TRUE))
 
 
 })
