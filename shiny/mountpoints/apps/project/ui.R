@@ -65,6 +65,22 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             "Worth cause why students leave Supinfo",
             highchartOutput("plotLeavingReason")
+          ),
+          box(
+            title = "Supinfo successfull region",
+            width = 6,
+            status = "primary",
+            solidHeader = TRUE,
+            "What is the most successfull country for supinfo",
+            highchartOutput("plotEctsByRegion")
+          ),
+          box(
+            title = "Supinfo students repartition",
+            width = 6,
+            status = "success",
+            solidHeader = TRUE,
+            "How many student are in each supinfo representend country",
+            highchartOutput("plotApprentRegion")
           )
         )
 

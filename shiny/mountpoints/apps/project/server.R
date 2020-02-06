@@ -403,6 +403,14 @@ leaving_reason <- df_all %>%
   dplyr::count(course_leaving_reason) %>%
   head(., 5L) %>%
   dplyr::arrange(desc(n))
+credit_region <- df_all %>%
+  dplyr::group_by(last_country) %>%
+  dplyr::summarise(mean = mean(sum_ects)) %>%
+  dplyr::arrange(desc(mean))
+apprenticeship_region <- df_all %>%
+  dplyr::group_by(last_country) %>%
+  dplyr::summarise(n = n()) %>%
+  dplyr::arrange(desc(n))
 
 ####################
 # LANCEMENT DU SERVEUR
@@ -468,6 +476,20 @@ shinyServer(function(input, output) {
       hc_xAxis(categories = leaving_reason$course_leaving_reason) %>%
       hc_add_series(leaving_reason$n,
                     name = "Student leaved", showInLegend = FALSE)
+  })
+  output$plotEctsByRegion <- renderHighchart({
+    highchart() %>%
+      hc_chart(type = "column") %>%
+      hc_xAxis(categories = credit_region$last_country) %>%
+      hc_add_series(credit_region$mean,
+                    name = "ECTS Mean", showInLegend = FALSE)
+  })
+  output$plotApprentRegion <- renderHighchart({
+    highchart() %>%
+      hc_chart(type = "column") %>%
+      hc_xAxis(categories = apprenticeship_region$last_country) %>%
+      hc_add_series(apprenticeship_region$n,
+                    name = "Students count", showInLegend = FALSE)
   })
 
   ####################
