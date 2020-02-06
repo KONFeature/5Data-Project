@@ -356,22 +356,33 @@ df_all <- df_all %>%
     B.Sc._ects = as.numeric(B.Sc._ects),
     M.Sc.1_ects = as.numeric(M.Sc.1_ects),
     M.Sc.2_ects = as.numeric(M.Sc.2_ects),
+    A.Sc.1_apprenticeship = as.logical(A.Sc.1_apprenticeship), # Convertie les apprenticeship en logique
+    A.Sc.2_apprenticeship = as.logical(A.Sc.2_apprenticeship),
+    B.Sc._apprenticeship = as.logical(B.Sc._apprenticeship),
+    M.Sc.1_apprenticeship = as.logical(M.Sc.1_apprenticeship),
+    M.Sc.2_apprenticeship = as.logical(M.Sc.2_apprenticeship),
     A.Sc.1_ects = replace_na(A.Sc.1_ects, 0), # Remplace les NA des crédits en 0
     A.Sc.2_ects = replace_na(A.Sc.2_ects, 0),
     B.Sc._ects = replace_na(B.Sc._ects, 0),
     M.Sc.1_ects = replace_na(M.Sc.1_ects, 0),
     M.Sc.2_ects = replace_na(M.Sc.2_ects, 0), 
-    last_country = ifelse(!is.na(M.Sc.2_country), M.Sc.2_country, # Ajoute le dernier pays de l'utilisateur
+    A.Sc.1_apprenticeship = replace_na(A.Sc.1_apprenticeship, FALSE), # Remplace les NA des apprenticeship par false
+    A.Sc.2_apprenticeship = replace_na(A.Sc.2_apprenticeship, FALSE),
+    B.Sc._apprenticeship = replace_na(B.Sc._apprenticeship, FALSE),
+    M.Sc.1_apprenticeship = replace_na(M.Sc.1_apprenticeship, FALSE),
+    M.Sc.2_apprenticeship = replace_na(M.Sc.2_apprenticeship, FALSE),
+    last_country = as.character(ifelse(!is.na(M.Sc.2_country), M.Sc.2_country, # Ajoute le dernier pays de l'utilisateur
                     ifelse(!is.na(M.Sc.1_country), M.Sc.1_country, 
                       ifelse(!is.na(B.Sc._country), B.Sc._country, 
                         ifelse(!is.na(A.Sc.2_country), A.Sc.2_country, 
-                          ifelse(!is.na(A.Sc.1_country), A.Sc.1_country, NA))))),
-    last_campus = ifelse(!is.na(M.Sc.2_campus), M.Sc.2_campus, # Ajoute le dernier campus de l'utilisateur
+                          ifelse(!is.na(A.Sc.1_country), A.Sc.1_country, "unknown")))))),
+    last_campus = as.character(ifelse(!is.na(M.Sc.2_campus), M.Sc.2_campus, # Ajoute le dernier campus de l'utilisateur
                     ifelse(!is.na(M.Sc.1_campus), M.Sc.1_campus, 
                       ifelse(!is.na(B.Sc._campus), B.Sc._campus, 
                         ifelse(!is.na(A.Sc.2_campus), A.Sc.2_campus, 
-                          ifelse(!is.na(A.Sc.1_campus), A.Sc.1_campus, NA)))))) %>%
-    mutate(sum_ects = rowSums(.[grep("_ects", names(.))], na.rm = TRUE)) # Calcul la somme des ECTS
+                          ifelse(!is.na(A.Sc.1_campus), A.Sc.1_campus, "unknown")))))),     
+    apprenticeship_once = M.Sc.2_apprenticeship | M.Sc.1_apprenticeship | B.Sc._apprenticeship | A.Sc.2_apprenticeship | A.Sc.1_apprenticeship) %>%
+    mutate(sum_ects = rowSums(.[grep("_ects", names(.))], na.rm = TRUE)) # Calcul la somme des ECTS) 
 
 ####################
 # PREPARATION DU GRAPH
@@ -469,7 +480,7 @@ shinyServer(function(input, output) {
   ####################
 
   output$testStr <- renderPrint({
-    input$column_axis_x
+    "test"
   })
 
   output$dynamicPlot <- renderHighchart({
@@ -486,13 +497,13 @@ shinyServer(function(input, output) {
 
     # Group & arrange df
     df_filtered <- df_filtered %>%
-      dplyr::count(df_filtered[[input$column_axis_x]]) %>%
-      dplyr::arrange(desc(n))
+      dplyr::count(df_filtered[[input$graph_axis_x]], sort = TRUE)
+    names(df_filtered)[names(df_filtered) == "df_filtered[[input$graph_axis_x]]"] <- "to_display_row"
 
     # Generate graph
     highchart() %>%
-      hc_chart(type = "column") %>%
-      hc_xAxis(categories = df_filtered[[input$column_axis_x]]) %>%
+      hc_chart(type = input$graph_type) %>%
+      hc_xAxis(categories = df_filtered$to_display_row) %>%
       hc_add_series(df_filtered$n,
                     name = "Count", showInLegend = FALSE)
   })

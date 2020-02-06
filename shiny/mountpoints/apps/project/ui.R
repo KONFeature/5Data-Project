@@ -99,12 +99,10 @@ ui <- dashboardPage(
         fluidRow(
           box(
             title = "Filter on for the graph below",
-            width = 4,
-            status = "info",
+            width = 6,
+            status = "danger",
             solidHeader = TRUE,
             "Some filter on the input data used to display the below graph",
-            dateRangeInput("birthdate_range",
-              h5("Birthdate range")),
             selectInput("graduated_select", 
               h5("Student graduated"),
               choices = list("No filter" = NA,
@@ -118,15 +116,20 @@ ui <- dashboardPage(
           ),
           box(
             title = "Wich column to display on the graph",
-            width = 4,
+            width = 6,
             status = "success",
             solidHeader = TRUE,
-            "Select the axis of the graph to display",
-            selectInput("column_axis_y", 
-              h5("Axe Y"),
-              choices = list("Count" = 0,
-                              "ECTS Sum" = 1), selected = 0),
-            selectInput("column_axis_x", 
+            "Select the axis and the type of the graph to display",
+            selectInput("graph_type", 
+              h5("Graph type"),
+              choices = list("Column" = "column",
+                              "Bar" = "bar",
+                              "Line" = "line",
+                              "Pie" = "pie",
+                              "Tree Map" = "treemap",
+                              "Funnel" = "funnel",
+                              "Pyramid" = "pyramid"), selected = "column"),
+            selectInput("graph_axis_x", 
               h5("Axe X"),
               choices = list("Graduated" = "graduated",
                               "Course was left" = "course_was_left",
@@ -144,8 +147,8 @@ ui <- dashboardPage(
             status = "info",
             solidHeader = TRUE,
             highchartOutput("dynamicPlot")
-          ),
-          textOutput("testStr")
+          )
+          # textOutput("testStr")
         )
       )
     )
