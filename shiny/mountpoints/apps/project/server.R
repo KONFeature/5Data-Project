@@ -36,7 +36,7 @@ my_spark <- sparkR.session(
 
 # Fetch students from mongo
 students <- SparkR::read.df("", source = "mongo")
-students <- SparkR::filter(students, students$id < 1000)
+students <- SparkR::filter(students, students$id < 20000)
 df <- as.data.frame(students)
 
 # Separation de contact en email et phone
@@ -407,7 +407,12 @@ credit_region <- df_all %>%
   dplyr::group_by(last_country) %>%
   dplyr::summarise(mean = mean(sum_ects)) %>%
   dplyr::arrange(desc(mean))
+student_region <- df_all %>%
+  dplyr::group_by(last_country) %>%
+  dplyr::summarise(n = n()) %>%
+  dplyr::arrange(desc(n))
 apprenticeship_region <- df_all %>%
+  dplyr::filter(apprenticeship_once == TRUE) %>%
   dplyr::group_by(last_country) %>%
   dplyr::summarise(n = n()) %>%
   dplyr::arrange(desc(n))
@@ -489,6 +494,13 @@ shinyServer(function(input, output) {
       hc_chart(type = "column") %>%
       hc_xAxis(categories = apprenticeship_region$last_country) %>%
       hc_add_series(apprenticeship_region$n,
+                    name = "Students count", showInLegend = FALSE)
+  })
+  output$plotStudentRegion <- renderHighchart({
+    highchart() %>%
+      hc_chart(type = "column") %>%
+      hc_xAxis(categories = student_region$last_country) %>%
+      hc_add_series(student_region$n,
                     name = "Students count", showInLegend = FALSE)
   })
 

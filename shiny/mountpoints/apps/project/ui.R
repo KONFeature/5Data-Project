@@ -75,12 +75,20 @@ ui <- dashboardPage(
             highchartOutput("plotEctsByRegion")
           ),
           box(
+            title = "Supinfo apprenticeship students repartition",
+            width = 6,
+            status = "success",
+            solidHeader = TRUE,
+            "How many student in apprenticeship are in each supinfo representend country",
+            highchartOutput("plotApprentRegion")
+          ),
+          box(
             title = "Supinfo students repartition",
             width = 6,
             status = "success",
             solidHeader = TRUE,
             "How many student are in each supinfo representend country",
-            highchartOutput("plotApprentRegion")
+            highchartOutput("plotStudentRegion")
           )
         )
 
