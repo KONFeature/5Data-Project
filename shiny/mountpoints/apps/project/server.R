@@ -390,10 +390,6 @@ leaving_reason <- df_all %>%
 # Define server logic required to draw a histogram
 shinyServer(function(input, output) {
 
-  output$testStr <- renderPrint({
-    "head(leaving_reason)"
-  })
-
   ####################
   # DASHBOARD
   ####################
@@ -458,6 +454,34 @@ shinyServer(function(input, output) {
   ####################
   output$table <- renderDataTable(head(df_all), options = list(scrollX = TRUE))
 
+  ####################
+  # Dynamic graph
+  ####################
+
+  output$testStr <- renderPrint({
+    as.logical(input$graduated_select)
+  })
+
+  output$dynamicPlot <- renderHighchart({
+    df_filtered <- df_all
+    # Check for filter
+    graduated_filter <- as.logical(input$graduated_select)
+    leave_filter <- as.logical(input$leave_select)
+    if(!is.na(graduated_filter)) {
+      df_filtered <- df_filtered[df_filtered$graduated == graduated_filter,]
+    }
+    if(!is.na(leave_filter)) {
+      df_filtered <- df_filtered[df_filtered$course_was_left == leave_filter,]
+    }
+    xAxis = input$column_axis_x
+
+    # Generate graph
+    highchart() %>%
+      hc_chart(type = "column") %>%
+      hc_xAxis(categories = df_filtered$university_discovery_reason) %>%
+      hc_add_series(df_filtered$sum_ects,
+                    name = "Sum ECTS", showInLegend = FALSE)
+  })
 
 })
 

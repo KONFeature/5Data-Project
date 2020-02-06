@@ -45,8 +45,7 @@ ui <- dashboardPage(
           valueBoxOutput("valueStudentsGraduatedCount", width = 4),
           valueBoxOutput("valueStudentsLeftCount", width = 4),
           valueBoxOutput("valueStudentsGraduatedRatio", width = 6),
-          valueBoxOutput("valueStudentsLeftRatio", width = 6),
-          textOutput("testStr")
+          valueBoxOutput("valueStudentsLeftRatio", width = 6)
         ),
 
         # Plot row
@@ -108,14 +107,14 @@ ui <- dashboardPage(
               h5("Birthdate range")),
             selectInput("graduated_select", 
               h5("Student graduated"),
-              choices = list("No filter" = 0,
-                              "Graduated" = 1,
-                              "Not graduated" = 2), selected = 0),
+              choices = list("No filter" = NA,
+                              "Graduated" = TRUE,
+                              "Not graduated" = FALSE), selected = NA),
             selectInput("leave_select", 
               h5("Student left"),
-              choices = list("No filter" = 0,
-                              "Left" = 1,
-                              "Not left" = 2), selected = 0)
+              choices = list("No filter" = NA,
+                              "Left" = TRUE,
+                              "Not left" = FALSE), selected = NA)
           ),
           box(
             title = "Wich column to display on the graph",
@@ -126,15 +125,27 @@ ui <- dashboardPage(
             selectInput("column_axis_y", 
               h5("Axe Y"),
               choices = list("Count" = 0,
-                              "Mean" = 1), selected = 0),
+                              "ECTS Sum" = 1), selected = 0),
             selectInput("column_axis_x", 
               h5("Axe X"),
-              choices = list("Discovery reason" = 0,
-                              "Leaving reason" = 1,
-                              "Last country" = 2,
-                              "Last campus" = 3,
-                              "ECTS Count" = 4), selected = 0)
+              choices = list("Graduated" = "graduated",
+                              "Course was left" = "course_was_left",
+                              "Discovery reason" = "university_discovery_reason",
+                              "Leaving reason" = "course_leaving_reason",
+                              "Last country" = "last_country",
+                              "Last campus" = "last_campus",), selected = "graduated")
           )
+        ),
+
+        fluidRow(
+          box(
+            title = "Result chart",
+            width = 12,
+            status = "info",
+            solidHeader = TRUE,
+            highchartOutput("dynamicPlot")
+          ),
+          textOutput("testStr")
         )
       )
     )
