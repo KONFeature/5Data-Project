@@ -6,8 +6,8 @@ Sys.setenv(SPARK_HOME = "/opt/spark-2.4.4-bin-hadoop2.7")
 library(jsonlite)
 library(shiny)
 library(highcharter)
-library(dplyr)
 library(SparkR)
+library(dplyr)
 library(jsonlite)
 library(dplyr)
 library(tidyr)
@@ -35,14 +35,9 @@ my_spark <- sparkR.session(
 ####################
 
 # Fetch students from mongo
-students <- read.df("", source = "mongo")
+students <- SparkR::read.df("", source = "mongo")
 students <- SparkR::filter(students, students$id < 1000)
 df <- as.data.frame(students)
-
-# Arrange some cols
-df <- df %>%
-  mutate(graduated = replace_na(graduated, FALSE)) %>%
-  mutate(course_was_left = replace_na(course_was_left, FALSE))
 
 # Separation de contact en email et phone
 email <- list()
@@ -351,6 +346,22 @@ for (i in df$courses) {
 df_all <- cbind(df_all, df_course)
 # Suppression de l'ancienne colonne
 df_all$courses <- NULL
+
+# Arrange some cols and aggregate some data
+df_all <- df_all %>%
+  mutate(graduated = replace_na(graduated, FALSE),
+    course_was_left = replace_na(course_was_left, FALSE),
+    A.Sc.1_ects = as.numeric(A.Sc.1_ects),
+    A.Sc.2_ects = as.numeric(A.Sc.2_ects),
+    B.Sc._ects = as.numeric(B.Sc._ects),
+    M.Sc.1_ects = as.numeric(M.Sc.1_ects),
+    M.Sc.2_ects = as.numeric(M.Sc.2_ects),
+    A.Sc.1_ects = replace_na(A.Sc.1_ects, 0),
+    A.Sc.2_ects = replace_na(A.Sc.2_ects, 0),
+    B.Sc._ects = replace_na(B.Sc._ects, 0),
+    M.Sc.1_ects = replace_na(M.Sc.1_ects, 0),
+    M.Sc.2_ects = replace_na(M.Sc.2_ects, 0)) %>%
+    mutate(sum_ects = rowSums(.[grep("_ects", names(.))], na.rm = TRUE))
 
 ####################
 # PREPARATION DU GRAPH
